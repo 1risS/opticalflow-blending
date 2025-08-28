@@ -25,8 +25,7 @@ function setup () {
       audio: false,
       video: {
         width: w,
-        height: h,
-        facingMode: { exact: 'environment' } // Forzar cámara trasera
+        height: h
       }
     },
     function () {
@@ -87,28 +86,6 @@ function draw () {
         image(temp, sx + dx, sy + dy, r, r)
         noTint()
         pop()
-        // Restauración local (blend/lerp) en la zona afectada
-        loadPixels()
-        imgBuffer.loadPixels()
-        let blendFactor = 0.08 // Ajusta la velocidad de restauración local (más alto = más rápido)
-        for (let y = sy; y < sy + r; y++) {
-          for (let x = sx; x < sx + r; x++) {
-            let idx = 4 * (Math.floor(x) + Math.floor(y) * width)
-            pixels[idx] = lerp(pixels[idx], imgBuffer.pixels[idx], blendFactor)
-            pixels[idx + 1] = lerp(
-              pixels[idx + 1],
-              imgBuffer.pixels[idx + 1],
-              blendFactor
-            )
-            pixels[idx + 2] = lerp(
-              pixels[idx + 2],
-              imgBuffer.pixels[idx + 2],
-              blendFactor
-            )
-            // pixels[idx+3] = 255;
-          }
-        }
-        updatePixels()
       }
     }
     // Restauración progresiva exacta: restaurar 1/180 del canvas por frame
@@ -116,15 +93,6 @@ function draw () {
     imgBuffer.loadPixels()
     let totalPixels = pixels.length / 4
     let pixelsPerFrame = Math.ceil(totalPixels / 180)
-    for (let p = 0; p < pixelsPerFrame; p++) {
-      let idx = (restoreIndex + p) % totalPixels
-      let i = idx * 4
-      pixels[i] = imgBuffer.pixels[i] // R
-      pixels[i + 1] = imgBuffer.pixels[i + 1] // G
-      pixels[i + 2] = imgBuffer.pixels[i + 2] // B
-      pixels[i + 3] = imgBuffer.pixels[i + 3] // A
-    }
-    restoreIndex = (restoreIndex + pixelsPerFrame) % totalPixels
     updatePixels()
   }
 }
